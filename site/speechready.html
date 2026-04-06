@@ -461,6 +461,11 @@
     <div id="form-section">
       <div class="card">
         <div class="form-group">
+          <label style="font-size:0.9rem;color:var(--muted);font-weight:500;">Your email address</label>
+          <input type="email" id="email" placeholder="Enter your email to receive your plan" />
+        </div>
+
+        <div class="form-group">
           <label><span class="num">1</span> What's your speech topic?</label>
           <input type="text" id="topic" placeholder="e.g. The importance of vulnerability in leadership" />
         </div>
@@ -482,16 +487,20 @@
             <option>Class/school</option>
             <option>Other</option>
           </select>
+          <div id="occasion-other-group" style="margin-top:10px;display:none;">
+            <input type="text" id="occasion-other" placeholder="Please describe your occasion" />
+          </div>
         </div>
 
         <div class="form-group">
           <label><span class="num">4</span> How long is your speech?</label>
           <select id="duration">
             <option value="" disabled selected>Select duration…</option>
-            <option>2 minutes</option>
             <option>5 minutes</option>
-            <option>10 minutes</option>
-            <option>20+ minutes</option>
+            <option>15 minutes</option>
+            <option>30 minutes</option>
+            <option>1 hour</option>
+            <option>90 minutes+</option>
           </select>
         </div>
 
@@ -521,21 +530,28 @@
               <span>Forgetting my lines</span>
             </label>
             <label class="radio-option">
-              <input type="radio" name="fear" value="Nervous about the audience" />
-              <span>Nervous about the audience</span>
+              <input type="radio" name="fear" value="General speaking anxiety" />
+              <span>General speaking anxiety</span>
             </label>
             <label class="radio-option">
               <input type="radio" name="fear" value="Not sure how to structure it" />
               <span>Not sure how to structure it</span>
             </label>
             <label class="radio-option">
-              <input type="radio" name="fear" value="General speaking anxiety" />
-              <span>General speaking anxiety</span>
+              <input type="radio" name="fear" value="Keeping the audience's attention" />
+              <span>Keeping the audience's attention</span>
             </label>
             <label class="radio-option">
               <input type="radio" name="fear" value="Not relevant — I'm comfortable" />
               <span>Not relevant — I'm comfortable</span>
             </label>
+            <label class="radio-option">
+              <input type="radio" name="fear" value="Other" />
+              <span>Other</span>
+            </label>
+            <div id="fear-other-group" style="display:none;margin-top:4px;">
+              <input type="text" id="fear-other" placeholder="Please describe your biggest fear" />
+            </div>
           </div>
         </div>
 
@@ -558,12 +574,6 @@
 
     <!-- RESULTS -->
     <div id="results">
-      <div class="result-section">
-        <h2><span class="icon">🎯</span> Word Count Target</h2>
-        <div class="word-count-badge" id="res-wordcount"></div>
-        <p class="word-count-note" id="res-wordcount-note"></p>
-      </div>
-
       <div class="result-section">
         <h2><span class="icon">📋</span> Speech Outline</h2>
         <div id="res-outline"></div>
@@ -612,16 +622,22 @@
     async function handleSubmit() {
       clearError();
 
+      const email = document.getElementById('email').value.trim();
       const topic = document.getElementById('topic').value.trim();
       const audience = document.getElementById('audience').value.trim();
       const occasion = document.getElementById('occasion').value;
+      const occasionOther = document.getElementById('occasion-other').value.trim();
       const duration = document.getElementById('duration').value;
       const experience = getRadio('experience');
-      const fear = getRadio('fear');
+      const fearRaw = getRadio('fear');
+      const fearOther = document.getElementById('fear-other').value.trim();
       const outcome = document.getElementById('outcome').value.trim();
 
-      if (!topic || !audience || !occasion || !duration || !experience || !fear || !outcome) {
-        showError('Please fill in all 7 fields before continuing.');
+      const fear = fearRaw === 'Other' ? (fearOther || 'Other') : fearRaw;
+      const occasionFinal = occasion === 'Other' ? (occasionOther ? `Other: ${occasionOther}` : 'Other') : occasion;
+
+      if (!email || !topic || !audience || !occasion || !duration || !experience || !fearRaw || !outcome) {
+        showError('Please fill in all fields before continuing.');
         return;
       }
 
@@ -630,11 +646,18 @@
       document.getElementById('loading').classList.add('active');
       document.getElementById('results').classList.remove('active');
 
+      // Send to Formspree (fire-and-forget)
+      fetch('https://formspree.io/f/mbdpqykq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email, topic, audience, occasion: occasionFinal, duration, experience, fear, outcome }),
+      }).catch(() => {});
+
       try {
         const response = await fetch('/.netlify/functions/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic, audience, occasion, duration, experience, fear, outcome }),
+          body: JSON.stringify({ topic, audience, occasion: occasionFinal, duration, experience, fear, outcome }),
         });
 
         if (!response.ok) {
@@ -652,12 +675,6 @@
     }
 
     function renderResults(data) {
-      // Word count
-      const wc = data.wordCount || '';
-      const wcParts = wc.split(' — ');
-      document.getElementById('res-wordcount').textContent = wcParts[0] || wc;
-      document.getElementById('res-wordcount-note').textContent = wcParts[1] || '';
-
       // Outline
       const outline = data.outline || {};
       let outlineHtml = '';
@@ -718,6 +735,16 @@
       clearError();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    document.getElementById('occasion').addEventListener('change', function () {
+      document.getElementById('occasion-other-group').style.display = this.value === 'Other' ? 'block' : 'none';
+    });
+
+    document.querySelectorAll('input[name="fear"]').forEach(function (radio) {
+      radio.addEventListener('change', function () {
+        document.getElementById('fear-other-group').style.display = this.value === 'Other' ? 'block' : 'none';
+      });
+    });
   </script>
 </body>
 </html>

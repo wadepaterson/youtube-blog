@@ -17,7 +17,7 @@ exports.handler = async function (event, context) {
 
   const { topic, audience, occasion, duration, experience, fear, outcome } = body;
 
-  const prompt = `You are an expert speech coach. A speaker has filled out a pre-speech prep form. Generate a comprehensive speech prep plan based on their answers.
+  const prompt = `You are a seasoned Toastmasters coach with hundreds of hours on stage and thousands of speakers coached. A speaker has filled out a pre-speech prep form. Generate a speech prep plan based on their answers.
 
 Speaker Details:
 - Speech Topic: ${topic}
@@ -31,7 +31,6 @@ Speaker Details:
 Generate the following in JSON format with these exact keys:
 
 {
-  "wordCount": "A specific word count target range (e.g. '500–650 words') based on the duration, with a brief note",
   "outline": {
     "hook": "A compelling opening section description (2–3 sentences explaining what to do)",
     "body": ["Point 1 description", "Point 2 description", "Point 3 description"],
@@ -43,7 +42,7 @@ Generate the following in JSON format with these exact keys:
     "Full opening hook #3 — a complete sentence or two they could actually say"
   ],
   "tips": [
-    "Personalized tip #1 addressing their fear/experience/occasion",
+    "Personalized tip #1",
     "Personalized tip #2",
     "Personalized tip #3",
     "Personalized tip #4",
@@ -58,7 +57,7 @@ Generate the following in JSON format with these exact keys:
   ]
 }
 
-Be specific and tailored to their topic, audience, occasion, experience, and fear. Make the hooks dramatic and memorable. Make tips directly address their stated fear. Return only valid JSON.`;
+For the tips: give only advice that a seasoned Toastmasters coach would give — practical, specific, and grounded in real on-stage experience. Every tip must be directly actionable and tailored to this speaker's topic, audience, occasion, experience level, and fear. No generic advice. No mention of the 'rule of three' or any academic or textbook frameworks. Tips must sound like they come from someone who has stood on stage hundreds of times and coached thousands of speakers through the same nerves and challenges. Make the hooks dramatic and memorable. Be specific and tailored throughout. Return only valid JSON.`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
