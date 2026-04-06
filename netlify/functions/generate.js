@@ -57,7 +57,7 @@ Generate the following in JSON format with these exact keys:
   ]
 }
 
-For the tips: give only advice that a seasoned Toastmasters coach would give — practical, specific, and grounded in real on-stage experience. Every tip must be directly actionable and tailored to this speaker's topic, audience, occasion, experience level, and fear. No generic advice. No mention of the 'rule of three' or any academic or textbook frameworks. Tips must sound like they come from someone who has stood on stage hundreds of times and coached thousands of speakers through the same nerves and challenges. Make the hooks dramatic and memorable. Be specific and tailored throughout. Return only valid JSON.`;
+For the tips: give only advice that a seasoned Toastmasters coach would give — practical, specific, and grounded in real on-stage experience. Every tip must be directly actionable and tailored to this speaker's topic, audience, occasion, experience level, and fear. No generic advice. No mention of the 'rule of three' or any academic or textbook frameworks. Tips must sound like they come from someone who has stood on stage hundreds of times and coached thousands of speakers through the same nerves and challenges. Make the hooks dramatic and memorable. Be specific and tailored throughout. When citing locations or giving location-based examples, always use Canadian cities — Vancouver, Toronto, or Calgary. Never use American cities like Phoenix or others. The tone and examples should feel Canadian. Return only valid JSON.`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
