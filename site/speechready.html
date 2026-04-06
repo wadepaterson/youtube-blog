@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpeechReady by Wade Paterson</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --card: #1a1a1a;
+      --border: #2a2a2a;
+      --purple: #7B2FBE;
+      --purple-light: #9B4FDE;
+      --text: #f0f0f0;
+      --muted: #888;
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    header h1 {
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    header p.byline {
+      color: var(--purple);
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    header p.sub {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 10px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    label .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--purple);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--purple);
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+    }
+
+    .radio-group, .radio-group-col {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .radio-group-col {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .radio-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      background: #111;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .radio-option input[type="radio"]:checked {
+      border-color: var(--purple);
+      background: var(--purple);
+      box-shadow: inset 0 0 0 3px #111;
+    }
+
+    .radio-option span {
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .btn-primary {
+      display: block;
+      width: 100%;
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 16px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.01em;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover { background: var(--purple-light); }
+    .btn-primary:active { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Loading */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 48px 20px;
+    }
+
+    .loading.active { display: block; }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* Results */
+    #results { display: none; }
+    #results.active { display: block; }
+
+    .result-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .result-section h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .result-section h2 .icon {
+      font-size: 1.2rem;
+    }
+
+    .word-count-badge {
+      display: inline-block;
+      background: #1f1030;
+      border: 1px solid var(--purple);
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--purple-light);
+    }
+
+    .word-count-note {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 8px;
+    }
+
+    .outline-block {
+      border-left: 3px solid var(--purple);
+      padding-left: 16px;
+      margin-bottom: 16px;
+    }
+
+    .outline-block h3 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .outline-block p, .outline-block li {
+      font-size: 0.92rem;
+      color: #ccc;
+      line-height: 1.6;
+    }
+
+    .outline-block ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .outline-block ul li::before {
+      content: "→ ";
+      color: var(--purple);
+    }
+
+    .hooks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .hook-item {
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.92rem;
+      color: #ddd;
+      line-height: 1.6;
+      position: relative;
+      padding-left: 44px;
+    }
+
+    .hook-item::before {
+      content: attr(data-num);
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      width: 22px;
+      height: 22px;
+      background: var(--purple);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tips-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tip-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .tip-num {
+      width: 28px;
+      height: 28px;
+      background: #1f1030;
+      border: 1px solid var(--purple);
+      color: var(--purple);
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .tip-item p {
+      font-size: 0.92rem;
+      color: #ccc;
+      line-height: 1.6;
+    }
+
+    .warmup-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .warmup-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      background: #111;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .warmup-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--purple);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .warmup-item p {
+      font-size: 0.91rem;
+      color: #ccc;
+      line-height: 1.5;
+    }
+
+    .cta-block {
+      background: linear-gradient(135deg, #1a1030 0%, #1a1a1a 100%);
+      border: 1px solid var(--purple);
+      border-radius: var(--radius);
+      padding: 32px;
+      text-align: center;
+      margin-top: 28px;
+    }
+
+    .cta-block p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+    }
+
+    .cta-block a {
+      display: inline-block;
+      background: var(--purple);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 13px 28px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .cta-block a:hover { background: var(--purple-light); }
+
+    .error-box {
+      background: #1a0f0f;
+      border: 1px solid #5a1a1a;
+      border-radius: 8px;
+      padding: 16px 20px;
+      color: #f87171;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .error-box.active { display: block; }
+
+    .reset-btn {
+      display: block;
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 12px;
+      font-family: inherit;
+    }
+
+    .reset-btn:hover { border-color: var(--purple); color: var(--text); }
+
+    @media (max-width: 480px) {
+      .card, .result-section { padding: 20px; }
+      .cta-block { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>SpeechReady</h1>
+      <p class="byline">by Wade Paterson</p>
+      <p class="sub">Answer 7 questions. Get your personalized speech prep plan.</p>
+    </header>
+
+    <!-- FORM -->
+    <div id="form-section">
+      <div class="card">
+        <div class="form-group">
+          <label><span class="num">1</span> What's your speech topic?</label>
+          <input type="text" id="topic" placeholder="e.g. The importance of vulnerability in leadership" />
+        </div>
+
+        <div class="form-group">
+          <label><span class="num">2</span> Who is your audience?</label>
+          <input type="text" id="audience" placeholder="e.g. 200 senior managers at a corporate retreat" />
+        </div>
+
+        <div class="form-group">
+          <label><span class="num">3</span> What's the occasion?</label>
+          <select id="occasion">
+            <option value="" disabled selected>Select occasion…</option>
+            <option>Toastmasters meeting</option>
+            <option>Wedding</option>
+            <option>Work presentation</option>
+            <option>Keynote/conference</option>
+            <option>Job interview</option>
+            <option>Class/school</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label><span class="num">4</span> How long is your speech?</label>
+          <select id="duration">
+            <option value="" disabled selected>Select duration…</option>
+            <option>2 minutes</option>
+            <option>5 minutes</option>
+            <option>10 minutes</option>
+            <option>20+ minutes</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label><span class="num">5</span> What's your experience level?</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="experience" value="Beginner" />
+              <span>Beginner</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="experience" value="Intermediate" />
+              <span>Intermediate</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="experience" value="Advanced" />
+              <span>Advanced</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="num">6</span> What's your biggest fear with this speech?</label>
+          <div class="radio-group-col">
+            <label class="radio-option">
+              <input type="radio" name="fear" value="Forgetting my lines" />
+              <span>Forgetting my lines</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="fear" value="Nervous about the audience" />
+              <span>Nervous about the audience</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="fear" value="Not sure how to structure it" />
+              <span>Not sure how to structure it</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="fear" value="General speaking anxiety" />
+              <span>General speaking anxiety</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="fear" value="Not relevant — I'm comfortable" />
+              <span>Not relevant — I'm comfortable</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0">
+          <label><span class="num">7</span> What's the ONE thing you want your audience to feel or do after?</label>
+          <input type="text" id="outcome" placeholder="e.g. Feel inspired to have a difficult conversation they've been avoiding" />
+        </div>
+      </div>
+
+      <div class="error-box" id="error-box"></div>
+
+      <button class="btn-primary" id="submit-btn" onclick="handleSubmit()">Build My Plan ✦</button>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Building your personalized speech prep plan…</p>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results">
+      <div class="result-section">
+        <h2><span class="icon">🎯</span> Word Count Target</h2>
+        <div class="word-count-badge" id="res-wordcount"></div>
+        <p class="word-count-note" id="res-wordcount-note"></p>
+      </div>
+
+      <div class="result-section">
+        <h2><span class="icon">📋</span> Speech Outline</h2>
+        <div id="res-outline"></div>
+      </div>
+
+      <div class="result-section">
+        <h2><span class="icon">⚡</span> 3 Opening Hooks</h2>
+        <div class="hooks-list" id="res-hooks"></div>
+      </div>
+
+      <div class="result-section">
+        <h2><span class="icon">💡</span> 5 Personalized Tips</h2>
+        <div class="tips-list" id="res-tips"></div>
+      </div>
+
+      <div class="result-section">
+        <h2><span class="icon">🔥</span> Pre-Speech Warmup Routine</h2>
+        <div class="warmup-list" id="res-warmup"></div>
+      </div>
+
+      <div class="cta-block">
+        <p>Ready to take your speech to the next level?</p>
+        <a href="https://stan.store/wadepaterson" target="_blank" rel="noopener">Want personal feedback on your speech? Book a Speech Evaluation →</a>
+      </div>
+
+      <button class="reset-btn" onclick="resetForm()">← Start Over</button>
+    </div>
+  </div>
+
+  <script>
+    function getRadio(name) {
+      const el = document.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : '';
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('error-box');
+      box.textContent = msg;
+      box.classList.add('active');
+    }
+
+    function clearError() {
+      document.getElementById('error-box').classList.remove('active');
+    }
+
+    async function handleSubmit() {
+      clearError();
+
+      const topic = document.getElementById('topic').value.trim();
+      const audience = document.getElementById('audience').value.trim();
+      const occasion = document.getElementById('occasion').value;
+      const duration = document.getElementById('duration').value;
+      const experience = getRadio('experience');
+      const fear = getRadio('fear');
+      const outcome = document.getElementById('outcome').value.trim();
+
+      if (!topic || !audience || !occasion || !duration || !experience || !fear || !outcome) {
+        showError('Please fill in all 7 fields before continuing.');
+        return;
+      }
+
+      // Show loading
+      document.getElementById('form-section').style.display = 'none';
+      document.getElementById('loading').classList.add('active');
+      document.getElementById('results').classList.remove('active');
+
+      try {
+        const response = await fetch('/.netlify/functions/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic, audience, occasion, duration, experience, fear, outcome }),
+        });
+
+        if (!response.ok) {
+          const err = await response.text();
+          throw new Error(err || `Server error ${response.status}`);
+        }
+
+        const data = await response.json();
+        renderResults(data);
+      } catch (err) {
+        document.getElementById('loading').classList.remove('active');
+        document.getElementById('form-section').style.display = 'block';
+        showError('Something went wrong: ' + err.message + '. Please try again.');
+      }
+    }
+
+    function renderResults(data) {
+      // Word count
+      const wc = data.wordCount || '';
+      const wcParts = wc.split(' — ');
+      document.getElementById('res-wordcount').textContent = wcParts[0] || wc;
+      document.getElementById('res-wordcount-note').textContent = wcParts[1] || '';
+
+      // Outline
+      const outline = data.outline || {};
+      let outlineHtml = '';
+      if (outline.hook) {
+        outlineHtml += `<div class="outline-block"><h3>Hook</h3><p>${outline.hook}</p></div>`;
+      }
+      if (outline.body && Array.isArray(outline.body)) {
+        outlineHtml += `<div class="outline-block"><h3>Body</h3><ul>`;
+        outline.body.forEach(pt => { outlineHtml += `<li>${pt}</li>`; });
+        outlineHtml += `</ul></div>`;
+      }
+      if (outline.close) {
+        outlineHtml += `<div class="outline-block"><h3>Close</h3><p>${outline.close}</p></div>`;
+      }
+      document.getElementById('res-outline').innerHTML = outlineHtml;
+
+      // Hooks
+      const hooksEl = document.getElementById('res-hooks');
+      hooksEl.innerHTML = '';
+      (data.hooks || []).forEach((h, i) => {
+        const div = document.createElement('div');
+        div.className = 'hook-item';
+        div.setAttribute('data-num', i + 1);
+        div.textContent = h;
+        hooksEl.appendChild(div);
+      });
+
+      // Tips
+      const tipsEl = document.getElementById('res-tips');
+      tipsEl.innerHTML = '';
+      (data.tips || []).forEach((t, i) => {
+        tipsEl.innerHTML += `
+          <div class="tip-item">
+            <div class="tip-num">${i + 1}</div>
+            <p>${t}</p>
+          </div>`;
+      });
+
+      // Warmup
+      const warmupEl = document.getElementById('res-warmup');
+      warmupEl.innerHTML = '';
+      (data.warmup || []).forEach(w => {
+        warmupEl.innerHTML += `
+          <div class="warmup-item">
+            <div class="warmup-dot"></div>
+            <p>${w}</p>
+          </div>`;
+      });
+
+      document.getElementById('loading').classList.remove('active');
+      document.getElementById('results').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+      document.getElementById('results').classList.remove('active');
+      document.getElementById('form-section').style.display = 'block';
+      clearError();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
