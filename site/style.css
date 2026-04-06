@@ -380,6 +380,65 @@ article em     { font-style: italic; }
 }
 
 /* ------------------------------------------------------------------ */
+/* CTA cards (index page)                                              */
+/* ------------------------------------------------------------------ */
+.cta-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.cta-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-left: 3px solid #7B2FBE;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  text-decoration: none;
+  transition: transform 0.2s ease, border-left-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cta-card:hover {
+  transform: translateY(-3px);
+  border-left-color: #a855f7;
+  box-shadow: 0 6px 24px rgba(123, 47, 190, 0.25);
+  text-decoration: none;
+}
+
+.cta-card__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cta-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cta-card__heading {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.cta-card__sub {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ------------------------------------------------------------------ */
 /* Responsive                                                          */
 /* ------------------------------------------------------------------ */
 @media (max-width: 900px) {
@@ -392,6 +451,9 @@ article em     { font-style: italic; }
   html { font-size: 16px; }
   article h1 { font-size: 1.7rem; }
   .cta { padding: 2rem 1.25rem; }
+  .cta-cards {
+    grid-template-columns: 1fr;
+  }
   .post-grid {
     grid-template-columns: 1fr;
   }

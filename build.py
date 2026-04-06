@@ -265,6 +265,38 @@ def write_index_html(posts: list[dict], search_index: list[dict]) -> None:
       <input type="search" id="search-input" placeholder="Search posts\u2026" autocomplete="off" spellcheck="false">
       <div id="search-dropdown" class="search-dropdown"></div>
     </div>
+    <div class="cta-cards">
+      <a href="https://www.youtube.com/@wadepaterson" target="_blank" rel="noopener noreferrer" class="cta-card">
+        <div class="cta-card__icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="20" cy="20" r="19" stroke="#7B2FBE" stroke-width="2"/>
+            <polygon points="16,13 30,20 16,27" fill="#7B2FBE"/>
+          </svg>
+        </div>
+        <div class="cta-card__body">
+          <h2 class="cta-card__heading">Watch on YouTube</h2>
+          <p class="cta-card__sub">Impactful videos on public speaking &amp; communication</p>
+        </div>
+      </a>
+      <a href="/speechready.html" class="cta-card">
+        <div class="cta-card__icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="14" y="4" width="12" height="20" rx="6" fill="#7B2FBE"/>
+            <path d="M8 22c0 6.627 5.373 12 12 12s12-5.373 12-12" stroke="#7B2FBE" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <line x1="20" y1="34" x2="20" y2="38" stroke="#7B2FBE" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="31" cy="9" r="3" fill="#7B2FBE"/>
+            <line x1="31" y1="5" x2="31" y2="4" stroke="#7B2FBE" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="31" y1="13" x2="31" y2="14" stroke="#7B2FBE" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="27" y1="9" x2="26" y2="9" stroke="#7B2FBE" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="35" y1="9" x2="36" y2="9" stroke="#7B2FBE" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="cta-card__body">
+          <h2 class="cta-card__heading">Try SpeechReady — Free</h2>
+          <p class="cta-card__sub">Get your personalized speech prep plan in seconds</p>
+        </div>
+      </a>
+    </div>
     <main>
       <ul class="post-grid">
 {items}
