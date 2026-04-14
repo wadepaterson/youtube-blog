@@ -1,13 +1,13 @@
 {
-  "4-myths-about-public-speaking": {
-    "video_id": "IzW4UmMxV7Y",
-    "thumbnail_url": "https://i.ytimg.com/vi/IzW4UmMxV7Y/maxresdefault.jpg",
-    "youtube_title": "4 MYTHS About Public Speaking"
+  "public-speaking-nightmares-and-how-to-deal-with-them": {
+    "video_id": "6ro_YMsseZU",
+    "thumbnail_url": "https://i.ytimg.com/vi/6ro_YMsseZU/maxresdefault.jpg",
+    "youtube_title": "Public Speaking Nightmares (and how to deal with them)"
   },
-  "answering-your-question-on-how-to-mc-a-wedding-tips-to-help-you-emcee-like-a-pro": {
-    "video_id": "0GniXplG5pI",
-    "thumbnail_url": "https://i.ytimg.com/vi/0GniXplG5pI/maxresdefault.jpg",
-    "youtube_title": "Answering Your Question on How to MC a Wedding (Tips to Help You EMCEE Like a Pro)"
+  "single-take-on-the-importance-of-storytelling": {
+    "video_id": "unRCCPM3FGo",
+    "thumbnail_url": "https://i.ytimg.com/vi/unRCCPM3FGo/maxresdefault.jpg",
+    "youtube_title": "Single-Take on the Importance of Storytelling"
   },
   "mental-frameworks-to-handle-unexpected-questions-during-a-live-panel": {
     "video_id": "ujbFnlTCk_o",
@@ -87,7 +87,7 @@
   "pathways-level-2-introduction-to-toastmasters-mentoring": {
     "video_id": "hKMMH7bEA9g",
     "thumbnail_url": "https://i.ytimg.com/vi/hKMMH7bEA9g/maxresdefault.jpg",
-    "youtube_title": "PATHWAYS Level 2 – Introduction to Toastmasters Mentoring"
+    "youtube_title": "PATHWAYS Level 2 \u2013 Introduction to Toastmasters Mentoring"
   },
   "reacting-to-a-toastmasters-speech": {
     "video_id": "tAVz4CgIS80",
@@ -107,7 +107,7 @@
   "understanding-your-communication-style-pathways-level-2-speech-toastmasters": {
     "video_id": "osuagrZYq7M",
     "thumbnail_url": "https://i.ytimg.com/vi/osuagrZYq7M/maxresdefault.jpg",
-    "youtube_title": "Understanding Your Communication Style – Pathways Level 2 Speech (TOASTMASTERS)"
+    "youtube_title": "Understanding Your Communication Style \u2013 Pathways Level 2 Speech (TOASTMASTERS)"
   },
   "visiting-liverpool-city-toastmasters": {
     "video_id": "ZJvv51JHUqI",
@@ -117,7 +117,7 @@
   "handy-way-to-memorize-a-speech": {
     "video_id": "nahFOORUJss",
     "thumbnail_url": "https://i.ytimg.com/vi/nahFOORUJss/maxresdefault.jpg",
-    "youtube_title": "‘Handy’ Way to MEMORIZE a Speech"
+    "youtube_title": "\u2018Handy\u2019 Way to MEMORIZE a Speech"
   },
   "sonder-makes-you-a-better-communicator": {
     "video_id": "8r-C5LsHj0A",
@@ -132,7 +132,7 @@
   "evaluation-and-feedback-4th-speech-in-pathways-level-1-toastmasters": {
     "video_id": "3k6ZmFo5WMU",
     "thumbnail_url": "https://i.ytimg.com/vi/3k6ZmFo5WMU/maxresdefault.jpg",
-    "youtube_title": "Evaluation and Feedback – 4th Speech in Pathways Level 1 (TOASTMASTERS)"
+    "youtube_title": "Evaluation and Feedback \u2013 4th Speech in Pathways Level 1 (TOASTMASTERS)"
   },
   "toastmasters-level-1-speech-3-example": {
     "video_id": "R_3KEC8ryW4",
@@ -142,7 +142,7 @@
   "introduction-to-vocal-variety-and-body-language-3rd-speech-in-pathways-level-1-toastmasters": {
     "video_id": "Mxu6bnHYrW0",
     "thumbnail_url": "https://i.ytimg.com/vi/Mxu6bnHYrW0/maxresdefault.jpg",
-    "youtube_title": "Introduction to Vocal Variety and Body Language – 3rd Speech in Pathways Level 1 (TOASTMASTERS)"
+    "youtube_title": "Introduction to Vocal Variety and Body Language \u2013 3rd Speech in Pathways Level 1 (TOASTMASTERS)"
   },
   "toastmasters-level-1-speech-2-example": {
     "video_id": "cg_Gd2EiOpk",
@@ -152,12 +152,12 @@
   "writing-a-speech-with-purpose-2nd-speech-pathways-level-1-toastmasters": {
     "video_id": "ktLXVYyfHnk",
     "thumbnail_url": "https://i.ytimg.com/vi/ktLXVYyfHnk/maxresdefault.jpg",
-    "youtube_title": "Writing a Speech with Purpose – 2nd Speech Pathways Level 1 (TOASTMASTERS)"
+    "youtube_title": "Writing a Speech with Purpose \u2013 2nd Speech Pathways Level 1 (TOASTMASTERS)"
   },
   "dont-speak-into-a-microphone-like-this": {
     "video_id": "R-G5ROJ6v1E",
     "thumbnail_url": "https://i.ytimg.com/vi/R-G5ROJ6v1E/maxresdefault.jpg",
-    "youtube_title": "Don’t Speak into a MICROPHONE Like This!!"
+    "youtube_title": "Don\u2019t Speak into a MICROPHONE Like This!!"
   },
   "toastmasters-ice-breaker-example": {
     "video_id": "t82smvj42Zk",
@@ -207,7 +207,7 @@
   "why-practice-public-speaking-advice-from-worlds-greatest-freestyle-rapper": {
     "video_id": "tMTm_k6Rsjs",
     "thumbnail_url": "https://i.ytimg.com/vi/tMTm_k6Rsjs/maxresdefault.jpg",
-    "youtube_title": "Why Practice Public Speaking? Advice from World’s Greatest Freestyle Rapper"
+    "youtube_title": "Why Practice Public Speaking? Advice from World\u2019s Greatest Freestyle Rapper"
   },
   "overcome-the-fear-of-public-speaking": {
     "video_id": "NkPPp1BFnuU",
@@ -393,6 +393,11 @@
     "video_id": "kXBS-j98uQo",
     "thumbnail_url": "https://i.ytimg.com/vi/kXBS-j98uQo/maxresdefault.jpg",
     "youtube_title": "How to be an Effective PANELIST"
+  },
+  "4-myths-about-public-speaking": {
+    "video_id": "IzW4UmMxV7Y",
+    "thumbnail_url": "https://i.ytimg.com/vi/IzW4UmMxV7Y/maxresdefault.jpg",
+    "youtube_title": "4 MYTHS About Public Speaking"
   },
   "how-to-deliver-a-business-presentation": {
     "video_id": "8mTh0BmUVLE",
@@ -648,6 +653,11 @@
     "video_id": "Tj8LInLWljI",
     "thumbnail_url": "https://i.ytimg.com/vi/Tj8LInLWljI/maxresdefault.jpg",
     "youtube_title": "Master Your BODY LANGUAGE | Public Speaking Tips"
+  },
+  "answering-your-question-on-how-to-mc-a-wedding-tips-to-help-you-emcee-like-a-pro": {
+    "video_id": "0GniXplG5pI",
+    "thumbnail_url": "https://i.ytimg.com/vi/0GniXplG5pI/maxresdefault.jpg",
+    "youtube_title": "Answering Your Question on How to MC a Wedding (Tips to Help You EMCEE Like a Pro)"
   },
   "taking-on-the-toastmaster-role-at-a-toastmasters-meeting": {
     "video_id": "QS-elnBhnE8",
