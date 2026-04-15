@@ -191,6 +191,39 @@ def write_post_html(title: str, html_body: str, filename: str, video_info: dict 
 def write_index_html(posts: list[dict], search_index: list[dict]) -> None:
     SITE_DIR.mkdir(exist_ok=True)
 
+    # Sort by playlist_index from channel_videos.jsonl (ascending; index 1 = newest)
+    video_mapping = load_video_mapping()
+    video_order: dict[str, int] = {}
+    channel_videos_file = Path("channel_videos.jsonl")
+    if channel_videos_file.exists():
+        with open(channel_videos_file, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                    vid_id = entry.get("id")
+                    idx = entry.get("playlist_index")
+                    if vid_id and idx is not None:
+                        video_order[vid_id] = int(idx)
+                except json.JSONDecodeError:
+                    pass
+
+    def _sort_key(p: dict) -> int:
+        slug = p["filename"].replace(".html", "")
+        vid_info = video_mapping.get(slug)
+        if vid_info:
+            vid_id = vid_info.get("video_id")
+            if vid_id and vid_id in video_order:
+                return video_order[vid_id]
+        return 9999
+
+    if video_order:
+        posts = sorted(posts, key=_sort_key)
+    else:
+        posts = sorted(posts, key=lambda p: p["title"].lower())
+
     def _card(p: dict) -> str:
         thumbnail = p.get("thumbnail_url")
         img_html = (
@@ -253,8 +286,17 @@ def write_index_html(posts: list[dict], search_index: list[dict]) -> None:
   </style>
 </head>
 <body>
-  <a href="https://www.youtube.com/@wadepaterson" target="_blank" rel="noopener noreferrer" class="site-banner-link">
-    <img src="wade_banner.jpg" alt="Wade Paterson" class="site-banner">
+  <a href="https://www.youtube.com/@wadepaterson" target="_blank" rel="noopener noreferrer" class="site-hero-link">
+    <section class="site-hero" aria-label="Wade Paterson hero">
+      <video class="hero-video" autoplay muted loop playsinline>
+        <source src="banner-video.mp4" type="video/mp4">
+      </video>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">WADE PATERSON</h1>
+        <p class="hero-subtitle">YOUTUBE BLOG</p>
+      </div>
+    </section>
   </a>
   <div class="container container--wide">
     <header>
@@ -784,8 +826,8 @@ def main() -> None:
     if video_order:
         posts.sort(key=_sort_key)
     else:
-        # Fallback: reverse alphabetical order
-        posts.sort(key=lambda p: p["title"].lower(), reverse=True)
+        # Fallback: alphabetical order
+        posts.sort(key=lambda p: p["title"].lower())
 
     search_index = build_search_index.get_index_data()
     write_index_html(posts, search_index)
