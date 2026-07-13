@@ -17,47 +17,19 @@ exports.handler = async function (event, context) {
 
   const { topic, audience, occasion, duration, experience, fear, outcome } = body;
 
-  const prompt = `You are a seasoned Toastmasters coach with hundreds of hours on stage and thousands of speakers coached. A speaker has filled out a pre-speech prep form. Generate a speech prep plan based on their answers.
+  const prompt = `You are a Toastmasters coach. Generate a speech prep plan as JSON.
 
-Speaker Details:
-- Speech Topic: ${topic}
-- Audience: ${audience}
-- Occasion: ${occasion}
-- Speech Duration: ${duration}
-- Experience Level: ${experience}
-- Biggest Fear: ${fear}
-- Desired Outcome (what they want the audience to feel/do): ${outcome}
+Speaker: topic=${topic}, audience=${audience}, occasion=${occasion}, duration=${duration}, experience=${experience}, fear=${fear}, outcome=${outcome}
 
-Generate the following in JSON format with these exact keys:
-
+Return only valid JSON with these keys:
 {
-  "outline": {
-    "hook": "A compelling opening section description (2–3 sentences explaining what to do)",
-    "body": ["Point 1 description", "Point 2 description", "Point 3 description"],
-    "close": "A powerful closing section description (2–3 sentences)"
-  },
-  "hooks": [
-    "Full opening hook #1 — a complete sentence or two they could actually say",
-    "Full opening hook #2 — a complete sentence or two they could actually say",
-    "Full opening hook #3 — a complete sentence or two they could actually say"
-  ],
-  "tips": [
-    "Personalized tip #1",
-    "Personalized tip #2",
-    "Personalized tip #3",
-    "Personalized tip #4",
-    "Personalized tip #5"
-  ],
-  "warmup": [
-    "Warmup step 1 (with timing, e.g. '2 minutes: ...')",
-    "Warmup step 2",
-    "Warmup step 3",
-    "Warmup step 4",
-    "Warmup step 5"
-  ]
+  "outline": { "hook": "1 sentence", "body": ["Point 1", "Point 2", "Point 3"], "close": "1 sentence" },
+  "hooks": ["Hook 1", "Hook 2", "Hook 3"],
+  "tips": ["Tip 1", "Tip 2", "Tip 3", "Tip 4", "Tip 5"],
+  "warmup": ["Step 1", "Step 2", "Step 3", "Step 4", "Step 5"]
 }
 
-For the tips: give only advice that a seasoned Toastmasters coach would give — practical, specific, and grounded in real on-stage experience. Every tip must be directly actionable and tailored to this speaker's topic, audience, occasion, experience level, and fear. No generic advice. No mention of the 'rule of three' or any academic or textbook frameworks. Tips must sound like they come from someone who has stood on stage hundreds of times and coached thousands of speakers through the same nerves and challenges. Make the hooks dramatic and memorable. Be specific and tailored throughout. When citing locations or giving location-based examples, always use Canadian cities — Vancouver, Toronto, or Calgary. Never use American cities like Phoenix or others. The tone and examples should feel Canadian. Return only valid JSON.`;
+Be specific and tailored to this speaker. Tips must be practical and actionable. Hooks should be dramatic. Use Canadian cities (Vancouver, Toronto, Calgary) for any location examples. Return only valid JSON.`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -68,8 +40,8 @@ For the tips: give only advice that a seasoned Toastmasters coach would give —
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1000,
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 800,
         messages: [{ role: "user", content: prompt }],
       }),
     });
