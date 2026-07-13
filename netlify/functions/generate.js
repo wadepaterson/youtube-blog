@@ -69,7 +69,7 @@ For the tips: give only advice that a seasoned Toastmasters coach would give —
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 2000,
+        max_tokens: 1000,
         messages: [{ role: "user", content: prompt }],
       }),
     });
