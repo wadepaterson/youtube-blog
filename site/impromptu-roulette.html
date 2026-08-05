@@ -301,6 +301,7 @@ function segUnderPointer(angle,n){
 
 function spinWheel(){
   if(isSpinning)return;
+  unlockAudio(); // Must be called synchronously inside user gesture for iOS
   const qs=getFiltered();
   const n=Math.min(qs.length,MAX_SEG);
   const arc=(2*Math.PI)/n;
@@ -378,62 +379,72 @@ function updateStats(){
   document.getElementById('total-count').textContent=qs.length;
 }
 
-// Shared AudioContext — unlocked on first user gesture
-let _ac=null;
-function getAC(){
-  if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();
-  if(_ac.state==='suspended')_ac.resume();
+// Audio system — iOS compatible
+// We create and resume the AudioContext directly inside the spin button tap
+let _ac = null;
+
+function getAC() {
+  if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
   return _ac;
 }
-// Unlock audio on first tap anywhere
-document.addEventListener('touchstart',()=>getAC(),{once:true});
-document.addEventListener('click',()=>getAC(),{once:true});
 
-// Web Audio spin sound
-function playSpinSound(){
-  try{
-    const ctx=getAC();
-    function tick(t,freq){
-      const o=ctx.createOscillator(),g=ctx.createGain();
-      o.connect(g);g.connect(ctx.destination);
-      o.frequency.setValueAtTime(freq,t);
-      o.frequency.exponentialRampToValueAtTime(freq*0.5,t+0.06);
-      g.gain.setValueAtTime(0.18,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.06);
-      o.start(t);o.stop(t+0.06);
-    }
-    const dur=4.5,now=ctx.currentTime;
-    let t=now,interval=0.05;
-    while(t<now+dur){
-      tick(t,200+Math.random()*300);
-      const progress=(t-now)/dur;
-      interval=0.05+progress*0.35;
-      t+=interval;
-    }
-    // final landing click
-    tick(now+dur,120);
-  }catch(e){}
+// Call this synchronously inside a user gesture to unlock iOS audio
+function unlockAudio() {
+  const ac = getAC();
+  if (ac.state === 'suspended') ac.resume();
+  // Play a silent buffer to unlock
+  const buf = ac.createBuffer(1, 1, 22050);
+  const src = ac.createBufferSource();
+  src.buffer = buf;
+  src.connect(ac.destination);
+  src.start(0);
 }
 
-function playDing(){
-  try{
-    const ac=getAC();
-    const now=ac.currentTime;
-    // Three rising tones for a satisfying "ding ding ding"
-    [[0,880,0.3],[0.18,1108,0.25],[0.34,1320,0.35]].forEach(([t,freq,vol])=>{
-      const o=ac.createOscillator(),g=ac.createGain();
-      const o2=ac.createOscillator(),g2=ac.createGain();
-      o.connect(g);g.connect(ac.destination);
-      o2.connect(g2);g2.connect(ac.destination);
-      o.frequency.value=freq;o.type='sine';
-      o2.frequency.value=freq*2;o2.type='sine';
-      g.gain.setValueAtTime(vol,now+t);
-      g.gain.exponentialRampToValueAtTime(0.001,now+t+0.8);
-      g2.gain.setValueAtTime(vol*0.3,now+t);
-      g2.gain.exponentialRampToValueAtTime(0.001,now+t+0.5);
-      o.start(now+t);o.stop(now+t+0.9);
-      o2.start(now+t);o2.stop(now+t+0.6);
+function playSpinSound() {
+  try {
+    const ctx = getAC();
+    if (ctx.state === 'suspended') { ctx.resume(); return; }
+    function tick(t, freq) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.setValueAtTime(freq, t);
+      o.frequency.exponentialRampToValueAtTime(freq * 0.5, t + 0.06);
+      g.gain.setValueAtTime(0.18, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+      o.start(t); o.stop(t + 0.07);
+    }
+    const dur = 4.5, now = ctx.currentTime;
+    let t = now, interval = 0.05;
+    while (t < now + dur) {
+      tick(t, 200 + Math.random() * 300);
+      const progress = (t - now) / dur;
+      interval = 0.05 + progress * 0.35;
+      t += interval;
+    }
+    tick(now + dur, 120);
+  } catch(e) {}
+}
+
+function playDing() {
+  try {
+    const ac = getAC();
+    if (ac.state === 'suspended') return;
+    const now = ac.currentTime;
+    [[0, 880, 0.3],[0.18, 1108, 0.25],[0.34, 1320, 0.35]].forEach(([t, freq, vol]) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      const o2 = ac.createOscillator(), g2 = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o2.connect(g2); g2.connect(ac.destination);
+      o.frequency.value = freq; o.type = 'sine';
+      o2.frequency.value = freq * 2; o2.type = 'sine';
+      g.gain.setValueAtTime(vol, now + t);
+      g.gain.exponentialRampToValueAtTime(0.001, now + t + 0.8);
+      g2.gain.setValueAtTime(vol * 0.3, now + t);
+      g2.gain.exponentialRampToValueAtTime(0.001, now + t + 0.5);
+      o.start(now + t); o.stop(now + t + 0.9);
+      o2.start(now + t); o2.stop(now + t + 0.6);
     });
-  }catch(e){}
+  } catch(e) {}
 }
 
 function startCountdown(q){
