@@ -80,6 +80,8 @@
   .page-footer a{color:var(--purple-light);text-decoration:none;font-weight:500}
   .page-footer a:hover{color:var(--white)}
   @media(max-width:720px){.main{grid-template-columns:1fr}.wheel-container{width:300px;height:300px}#wheel-canvas{width:300px;height:300px}.countdown-num{font-size:120px}}
+  .question-card.pulse{animation:questionPulse 0.6s ease}
+  @keyframes questionPulse{0%{transform:scale(1)}30%{transform:scale(1.02);box-shadow:0 0 40px var(--purple-glow)}100%{transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -376,10 +378,21 @@ function updateStats(){
   document.getElementById('total-count').textContent=qs.length;
 }
 
+// Shared AudioContext — unlocked on first user gesture
+let _ac=null;
+function getAC(){
+  if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();
+  if(_ac.state==='suspended')_ac.resume();
+  return _ac;
+}
+// Unlock audio on first tap anywhere
+document.addEventListener('touchstart',()=>getAC(),{once:true});
+document.addEventListener('click',()=>getAC(),{once:true});
+
 // Web Audio spin sound
 function playSpinSound(){
   try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const ctx=getAC();
     function tick(t,freq){
       const o=ctx.createOscillator(),g=ctx.createGain();
       o.connect(g);g.connect(ctx.destination);
@@ -388,7 +401,6 @@ function playSpinSound(){
       g.gain.setValueAtTime(0.18,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.06);
       o.start(t);o.stop(t+0.06);
     }
-    // fast ticks that slow down over duration
     const dur=4.5,now=ctx.currentTime;
     let t=now,interval=0.05;
     while(t<now+dur){
@@ -404,7 +416,7 @@ function playSpinSound(){
 
 function playDing(){
   try{
-    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const ac=getAC();
     const now=ac.currentTime;
     // Three rising tones for a satisfying "ding ding ding"
     [[0,880,0.3],[0.18,1108,0.25],[0.34,1320,0.35]].forEach(([t,freq,vol])=>{
@@ -464,6 +476,12 @@ function startTimer(){
   if(timerRunning)return;
   timerRunning=true;
   document.getElementById('timer-status').textContent='Speak now!';
+  // Pulse the question card to re-focus attention
+  const card=document.getElementById('question-card');
+  card.classList.remove('pulse');
+  void card.offsetWidth;
+  card.classList.add('pulse');
+  setTimeout(()=>card.classList.remove('pulse'),700);
   timerInterval=setInterval(()=>{
     timerSecs--;updateTimerDisplay();
     if(timerSecs<=0){
