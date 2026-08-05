@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impromptu Roulette — Wade Paterson</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--purple:#7B2FBE;--purple-light:#9B4FDE;--purple-glow:rgba(123,47,190,0.3);--white:#fff;--gray:#aaa;--gray-dim:#555}
+  html,body{background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+  .site-header{background:var(--bg);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;gap:10px}
+  .site-header a{color:var(--gray);text-decoration:none;font-size:13px;transition:color .2s}
+  .site-header a:hover{color:var(--white)}
+  .dot{width:8px;height:8px;background:var(--purple);border-radius:50%;flex-shrink:0}
+  .site-name{color:var(--white);font-size:13px;font-weight:600}
+  .sep{color:var(--gray-dim);font-size:13px}
+  .hero{text-align:center;padding:48px 24px 32px;position:relative}
+  .hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse at center top,rgba(123,47,190,.12) 0%,transparent 70%);pointer-events:none}
+  .hero-eyebrow{display:inline-block;background:var(--surface);border:1px solid var(--border);color:var(--purple-light);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;border-radius:20px;margin-bottom:16px}
+  .hero h1{font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,56px);font-weight:700;line-height:1.1;margin-bottom:12px}
+  .hero h1 em{font-style:italic;color:var(--purple-light)}
+  .hero-sub{color:var(--gray);font-size:15px;max-width:380px;margin:0 auto}
+  .main{max-width:920px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+  .wheel-side{display:flex;flex-direction:column;align-items:center;gap:20px}
+  .wheel-container{position:relative;width:380px;height:380px;flex-shrink:0}
+  #wheel-canvas{width:380px;height:380px;border-radius:50%;display:block}
+  .wheel-pointer{position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:28px solid var(--purple);filter:drop-shadow(0 0 8px var(--purple));z-index:10}
+  .wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:var(--bg);border:3px solid var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 0 20px var(--purple-glow)}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:100%}
+  .filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--gray);font-size:11px;font-weight:500;padding:6px 12px;border-radius:20px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+  .filter-btn:hover{border-color:var(--purple);color:var(--white)}
+  .filter-btn.active{background:rgba(123,47,190,.2);border-color:var(--purple);color:var(--purple-light)}
+  .spin-btn{width:100%;background:var(--purple);color:var(--white);border:none;border-radius:14px;padding:18px;font-size:16px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.5px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px}
+  .spin-btn:hover:not(:disabled){background:var(--purple-light);transform:translateY(-1px);box-shadow:0 8px 24px var(--purple-glow)}
+  .spin-btn:disabled{opacity:.5;cursor:not-allowed}
+  .right-side{display:flex;flex-direction:column;gap:16px;padding-top:8px}
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+  .stat-num{font-size:22px;font-weight:900;color:var(--purple-light);line-height:1;margin-bottom:4px}
+  .stat-lbl{font-size:10px;color:var(--gray-dim);text-transform:uppercase;letter-spacing:1px}
+  .question-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 28px;position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s;min-height:180px;display:flex;flex-direction:column;justify-content:center}
+  .question-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--purple);border-radius:16px 16px 0 0}
+  .question-card.landed{border-color:var(--purple);box-shadow:0 0 30px var(--purple-glow)}
+  .q-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .category-tag{display:inline-block;background:rgba(123,47,190,.15);border:1px solid rgba(123,47,190,.3);color:var(--purple-light);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:20px}
+  .q-number{font-size:11px;color:var(--gray-dim)}
+  .question-text{font-family:'Playfair Display',serif;font-size:clamp(17px,2.5vw,22px);font-weight:700;line-height:1.4;color:var(--white);transition:opacity .3s}
+  .question-text.idle{color:var(--gray);font-family:'Inter',sans-serif;font-size:14px;font-weight:400;font-style:italic}
+  .timer-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center}
+  .timer-label{font-size:11px;color:var(--gray-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+  .timer-display{font-size:56px;font-weight:900;letter-spacing:-3px;color:var(--white);font-variant-numeric:tabular-nums;transition:color .3s;line-height:1;margin-bottom:12px}
+  .timer-display.warning{color:#F5A623}
+  .timer-display.danger{color:#E94560}
+  .timer-display.done{color:var(--purple-light)}
+  .timer-progress{height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:12px}
+  .timer-bar{height:100%;background:var(--purple);border-radius:4px;transition:width 1s linear,background .3s;width:100%}
+  .timer-bar.warning{background:#F5A623}
+  .timer-bar.danger{background:#E94560}
+  .timer-status{font-size:12px;color:var(--gray-dim)}
+  .countdown-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,15,15,.88);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .3s}
+  .countdown-overlay.active{opacity:1;pointer-events:all}
+  .countdown-inner{display:flex;flex-direction:column;align-items:center;gap:32px;max-width:640px;padding:0 32px;text-align:center}
+  .countdown-question-wrap{font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,30px);font-weight:700;line-height:1.4;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.5);opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s}
+  .countdown-question-wrap.visible{opacity:1;transform:translateY(0)}
+  .countdown-divider{width:60px;height:2px;background:var(--purple);border-radius:2px;margin:0 auto}
+  .countdown-num{font-family:'Playfair Display',serif;font-size:clamp(100px,18vw,160px);font-weight:700;line-height:1;color:var(--purple);text-shadow:0 0 60px var(--purple-glow),0 0 120px rgba(123,47,190,.2)}
+  .countdown-num.pop{animation:countPop .8s cubic-bezier(.175,.885,.32,1.275) forwards}
+  @keyframes countPop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:1}}
+  .history-wrap{margin-top:4px}
+  .history-label{font-size:10px;color:var(--gray-dim);letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .history-label::after{content:'';flex:1;height:1px;background:var(--border)}
+  .history-list{display:flex;flex-direction:column;gap:6px}
+  .history-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:flex-start;gap:10px;opacity:.6;transition:opacity .2s}
+  .history-item:hover{opacity:1}
+  .history-num{font-size:10px;color:var(--purple-light);font-weight:700;min-width:20px;padding-top:1px}
+  .history-text{font-size:12px;color:var(--gray);flex:1;line-height:1.4}
+  .page-footer{border-top:1px solid var(--border);padding:24px;text-align:center}
+  .page-footer p{font-size:12px;color:var(--gray-dim);margin-bottom:6px}
+  .page-footer a{color:var(--purple-light);text-decoration:none;font-weight:500}
+  .page-footer a:hover{color:var(--white)}
+  @media(max-width:720px){.main{grid-template-columns:1fr}.wheel-container{width:300px;height:300px}#wheel-canvas{width:300px;height:300px}.countdown-num{font-size:120px}}
+</style>
+</head>
+<body>
+
+<div class="countdown-overlay" id="countdown-overlay">
+  <div class="countdown-inner">
+    <div class="countdown-question-wrap" id="countdown-question-wrap"></div>
+    <div class="countdown-num" id="countdown-num">5</div>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="dot"></div>
+  <span class="site-name">WADE PATERSON</span>
+  <span class="sep">·</span>
+  <a href="/">← Back to Blog</a>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow">Wade's Speaking Tool</div>
+  <h1>Impromptu<br><em>Roulette</em></h1>
+  <p class="hero-sub">Random question spinner for spontaneous speakers.</p>
+</section>
+
+<div class="main">
+  <div class="wheel-side">
+    <div class="wheel-container">
+      <div class="wheel-pointer"></div>
+      <canvas id="wheel-canvas" width="380" height="380" onclick="spinWheel()" style="cursor:pointer"></canvas>
+      <div class="wheel-center"><span style="font-size:20px">🎯</span></div>
+    </div>
+    <div class="filters">
+      <button class="filter-btn active" data-cat="all">All 100</button>
+      <button class="filter-btn" data-cat="Professional">Professional</button>
+      <button class="filter-btn" data-cat="Personal">Personal</button>
+      <button class="filter-btn" data-cat="Hypothetical">Hypothetical</button>
+      <button class="filter-btn" data-cat="Fun">Fun</button>
+      <button class="filter-btn" data-cat="Wisdom">Wisdom</button>
+    </div>
+    <button class="spin-btn" id="spin-btn" onclick="spinWheel()">🎰 Spin the Wheel</button>
+  </div>
+
+  <div class="right-side">
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="total-count">100</div><div class="stat-lbl">Questions</div></div>
+      <div class="stat-box"><div class="stat-num" id="spun-count">0</div><div class="stat-lbl">Spun</div></div>
+      <div class="stat-box"><div class="stat-num" id="remaining-count">100</div><div class="stat-lbl">Left</div></div>
+    </div>
+    <div class="question-card" id="question-card">
+      <div class="q-meta">
+        <span class="category-tag" id="q-category">Spin to begin</span>
+        <span class="q-number" id="q-number"></span>
+      </div>
+      <div class="question-text idle" id="question-text">Spin the wheel to get your question. A 5-second countdown then your 2-minute timer begins automatically.</div>
+    </div>
+    <div class="timer-wrap">
+      <div class="timer-label">Speech Timer</div>
+      <div class="timer-display" id="timer-display">2:00</div>
+      <div class="timer-progress"><div class="timer-bar" id="timer-bar"></div></div>
+      <div class="timer-status" id="timer-status">Waiting for spin…</div>
+    </div>
+    <div class="history-wrap" id="history-wrap" style="display:none">
+      <div class="history-label">Previous Questions</div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <p>A free tool from Wade Paterson — Public Speaking Coach</p>
+  <p><a href="/speechready.html">Try SpeechReady →</a> &nbsp;·&nbsp; <a href="https://www.youtube.com/@wadepaterson">YouTube →</a></p>
+</footer>
+
+<script>
+const QUESTIONS=[
+  {text:"Describe the best leader you've ever worked with. What made them exceptional?",cat:"Professional"},
+  {text:"What's the most important skill every professional should develop in the next five years?",cat:"Professional"},
+  {text:"Tell us about a time you had to deliver difficult feedback. How did you handle it?",cat:"Professional"},
+  {text:"What does a truly productive meeting look like to you?",cat:"Professional"},
+  {text:"Describe a professional failure that taught you more than any success.",cat:"Professional"},
+  {text:"If you could change one thing about how workplaces communicate, what would it be?",cat:"Professional"},
+  {text:"What's one habit that separates high performers from everyone else?",cat:"Professional"},
+  {text:"Tell us about a time you had to speak up when it would have been easier to stay silent.",cat:"Professional"},
+  {text:"What advice would you give someone starting their career today?",cat:"Professional"},
+  {text:"Describe your ideal work environment in three words — then explain each one.",cat:"Professional"},
+  {text:"What's the most underrated communication skill in the workplace?",cat:"Professional"},
+  {text:"Tell us about a time a presentation didn't go as planned. What did you learn?",cat:"Professional"},
+  {text:"How do you prepare for a high-stakes conversation?",cat:"Professional"},
+  {text:"What's the difference between a boss and a leader?",cat:"Professional"},
+  {text:"Describe the moment you realized you had found the right career path.",cat:"Professional"},
+  {text:"What's one piece of career advice you wish someone had given you earlier?",cat:"Professional"},
+  {text:"How do you handle a colleague who constantly talks over others in meetings?",cat:"Professional"},
+  {text:"What does success look like to you — beyond money and titles?",cat:"Professional"},
+  {text:"Describe the best piece of feedback you've ever received.",cat:"Professional"},
+  {text:"What is one thing most people don't know about you that you're willing to share?",cat:"Personal"},
+  {text:"Describe a moment that completely changed how you see the world.",cat:"Personal"},
+  {text:"What's a belief you held ten years ago that you no longer hold today?",cat:"Personal"},
+  {text:"Who has had the biggest influence on your life, and why?",cat:"Personal"},
+  {text:"What's the best piece of advice you've ever received?",cat:"Personal"},
+  {text:"Tell us about a time you were completely out of your comfort zone — and what happened.",cat:"Personal"},
+  {text:"What does a perfect Sunday look like to you?",cat:"Personal"},
+  {text:"What's something you're genuinely proud of that has nothing to do with work?",cat:"Personal"},
+  {text:"If you could relive one day from your past, which would it be and why?",cat:"Personal"},
+  {text:"What's one thing you've changed your mind about in the last year?",cat:"Personal"},
+  {text:"Describe the place in the world where you feel most like yourself.",cat:"Personal"},
+  {text:"What's a habit you've built that has genuinely changed your life?",cat:"Personal"},
+  {text:"Tell us about a book, film, or conversation that shifted your perspective.",cat:"Personal"},
+  {text:"What's something you're still trying to figure out about yourself?",cat:"Personal"},
+  {text:"Describe your relationship with failure. Has it changed over time?",cat:"Personal"},
+  {text:"What's one thing you want to do before the end of this year?",cat:"Personal"},
+  {text:"Who is someone you've never thanked properly — and what would you say?",cat:"Personal"},
+  {text:"What does courage look like in your everyday life?",cat:"Personal"},
+  {text:"What's the most important thing you've learned about yourself in the last year?",cat:"Personal"},
+  {text:"Describe a moment when a stranger changed your day for the better.",cat:"Personal"},
+  {text:"What's something you do differently from everyone else you know?",cat:"Personal"},
+  {text:"If you could have dinner with any three people in history, who would you choose and why?",cat:"Hypothetical"},
+  {text:"If you woke up tomorrow as the leader of your country, what's the first thing you'd do?",cat:"Hypothetical"},
+  {text:"If you could only keep three possessions, what would they be?",cat:"Hypothetical"},
+  {text:"If you could solve one world problem overnight, which would you choose?",cat:"Hypothetical"},
+  {text:"If you had to give a TED Talk tomorrow, what would it be about?",cat:"Hypothetical"},
+  {text:"If money were no object, how would you spend your time?",cat:"Hypothetical"},
+  {text:"If you could live in any era of history for one year, when would you choose?",cat:"Hypothetical"},
+  {text:"If you could only watch one speech for the rest of your life, which would it be?",cat:"Hypothetical"},
+  {text:"If you had to teach a class on any subject, what would you teach?",cat:"Hypothetical"},
+  {text:"If a film was made about your life, who would play you — and what would the title be?",cat:"Hypothetical"},
+  {text:"If you could uninvent one thing, what would it be and why?",cat:"Hypothetical"},
+  {text:"If you could master any skill instantly, what would you choose and how would you use it?",cat:"Hypothetical"},
+  {text:"If you had one billboard and could put any message on it, what would it say?",cat:"Hypothetical"},
+  {text:"If you could go back and give your 18-year-old self one piece of advice, what would it be?",cat:"Hypothetical"},
+  {text:"If you had to move to another country tomorrow, where would you go?",cat:"Hypothetical"},
+  {text:"If you could only read one book for the rest of your life, which would you choose?",cat:"Hypothetical"},
+  {text:"If you could change one law, what would it be?",cat:"Hypothetical"},
+  {text:"If you had an extra two hours every day, how would you spend them?",cat:"Hypothetical"},
+  {text:"If you could have any superpower for just one day, what would you choose and why?",cat:"Hypothetical"},
+  {text:"If you could add one subject to every school curriculum, what would it be?",cat:"Hypothetical"},
+  {text:"If you could witness any event in history firsthand, what would you choose?",cat:"Hypothetical"},
+  {text:"What's the most embarrassing thing that has ever happened to you in public?",cat:"Fun"},
+  {text:"Describe your perfect meal — every course, every detail.",cat:"Fun"},
+  {text:"What's a talent or skill you have that would surprise most people in this room?",cat:"Fun"},
+  {text:"If your life had a theme song, what would it be?",cat:"Fun"},
+  {text:"What's the strangest job you've ever had — or would be willing to do?",cat:"Fun"},
+  {text:"Describe the best holiday you've ever taken. What made it unforgettable?",cat:"Fun"},
+  {text:"What's a TV show, film or book you're slightly embarrassed to admit you love?",cat:"Fun"},
+  {text:"If you had to eat one meal for the rest of your life, what would it be?",cat:"Fun"},
+  {text:"What's the most spontaneous thing you've ever done?",cat:"Fun"},
+  {text:"If you could swap lives with anyone for a week, who would you choose?",cat:"Fun"},
+  {text:"What's your most controversial food opinion?",cat:"Fun"},
+  {text:"Describe your dream road trip — route, passengers and playlist included.",cat:"Fun"},
+  {text:"What's something on your bucket list that most people would find surprising?",cat:"Fun"},
+  {text:"If you hosted a dinner party for five famous people, who's on the guest list?",cat:"Fun"},
+  {text:"What's the weirdest thing you believed as a child that turned out to be completely wrong?",cat:"Fun"},
+  {text:"If you could be any fictional character for a day, who would you choose?",cat:"Fun"},
+  {text:"What's a sport or hobby you've never tried but secretly want to?",cat:"Fun"},
+  {text:"If you had to perform on stage tonight — not a speech — what would your act be?",cat:"Fun"},
+  {text:"What's your most controversial opinion about modern technology?",cat:"Fun"},
+  {text:"If you could only speak for five minutes a day, what would you talk about?",cat:"Fun"},
+  {text:"What does it mean to live a good life?",cat:"Wisdom"},
+  {text:"What's the most important lesson the last five years have taught you?",cat:"Wisdom"},
+  {text:"How do you define integrity — and can you give an example of it in action?",cat:"Wisdom"},
+  {text:"What's something our society values highly that you think is overrated?",cat:"Wisdom"},
+  {text:"What's the difference between being busy and being productive?",cat:"Wisdom"},
+  {text:"How do you know when to persist and when to walk away?",cat:"Wisdom"},
+  {text:"What does it mean to truly listen to another person?",cat:"Wisdom"},
+  {text:"What's one thing you've learned about people that you wish you'd known earlier?",cat:"Wisdom"},
+  {text:"How do you handle uncertainty — and has your approach changed over time?",cat:"Wisdom"},
+  {text:"What's something you believe that most people around you disagree with?",cat:"Wisdom"},
+  {text:"What's the relationship between confidence and competence?",cat:"Wisdom"},
+  {text:"How do you stay curious as you get older?",cat:"Wisdom"},
+  {text:"What's the most important thing you've learned about communication?",cat:"Wisdom"},
+  {text:"What role does vulnerability play in strong relationships?",cat:"Wisdom"},
+  {text:"What does it mean to be brave in everyday life?",cat:"Wisdom"},
+  {text:"What's the single most important quality in a friend?",cat:"Wisdom"},
+  {text:"What's something that looked like a mistake at the time but turned out to be a gift?",cat:"Wisdom"},
+  {text:"What's one thing about the future that excites you and one thing that concerns you?",cat:"Wisdom"},
+];
+
+const canvas=document.getElementById('wheel-canvas');
+const ctx=canvas.getContext('2d');
+const SIZE=380,cx=SIZE/2,cy=SIZE/2,RADIUS=SIZE/2-4,MAX_SEG=20;
+const SEG_COLORS=['#2d0f5e','#3d1478','#4a1a8a','#5a1fa8','#1a1060','#2929a0','#1a3a80','#2050b0','#0d3a5e','#1565a0','#0d4a6e','#1a6ab0','#380d5e','#5a1f9a','#4a0d6e','#6a1a9a','#0f3a0f','#2a6e2a','#1a4a1a','#3a803a'];
+let currentFilter='all',usedSet=new Set(),spinCount=0,history=[],wheelAngle=0,isSpinning=false;
+let timerSecs=120,timerInterval=null,timerRunning=false;
+
+function getFiltered(){return currentFilter==='all'?QUESTIONS:QUESTIONS.filter(q=>q.cat===currentFilter)}
+function trunc(s,n){return s.length>n?s.slice(0,n-2)+'…':s}
+
+function drawWheel(angle){
+  const qs=getFiltered();
+  const n=Math.min(qs.length,MAX_SEG);
+  const arc=(2*Math.PI)/n;
+  ctx.clearRect(0,0,SIZE,SIZE);
+  // glow ring
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,RADIUS+2,0,2*Math.PI);ctx.strokeStyle='rgba(123,47,190,.45)';ctx.lineWidth=5;ctx.stroke();ctx.restore();
+  for(let i=0;i<n;i++){
+    const sa=angle+i*arc,ea=angle+(i+1)*arc;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,RADIUS,sa,ea);ctx.closePath();
+    ctx.fillStyle=SEG_COLORS[i%SEG_COLORS.length];ctx.fill();
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,RADIUS,sa,ea);ctx.closePath();
+    ctx.strokeStyle='rgba(123,47,190,.5)';ctx.lineWidth=1.5;ctx.stroke();
+    const mid=angle+(i+.5)*arc;
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(mid);ctx.textAlign='right';ctx.fillStyle='rgba(255,255,255,.82)';ctx.font='9.5px Inter,sans-serif';
+    ctx.fillText(trunc(qs[i].text,26),RADIUS-10,4);ctx.restore();
+  }
+}
+
+// Which segment index is under the pointer (top = 3π/2)
+function segUnderPointer(angle,n){
+  const arc=(2*Math.PI)/n,POINTER=3*Math.PI/2;
+  let best=0,bestD=Infinity;
+  for(let i=0;i<n;i++){
+    const mid=((angle+(i+.5)*arc)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+    let d=Math.abs(mid-POINTER);if(d>Math.PI)d=2*Math.PI-d;
+    if(d<bestD){bestD=d;best=i;}
+  }
+  return best;
+}
+
+function spinWheel(){
+  if(isSpinning)return;
+  const qs=getFiltered();
+  const n=Math.min(qs.length,MAX_SEG);
+  const arc=(2*Math.PI)/n;
+  // pick question
+  const avail=qs.filter(q=>!usedSet.has(QUESTIONS.indexOf(q)));
+  const pool=avail.length>0?avail:qs;
+  const chosen=pool[Math.floor(Math.random()*pool.length)];
+  const segIdx=qs.indexOf(chosen)%n;
+  // compute target angle so segIdx lands under pointer
+  // pointer at 3π/2; seg midpoint: finalAngle+(segIdx+.5)*arc = 3π/2
+  const rawTarget=(3*Math.PI/2)-(segIdx+.5)*arc;
+  const currentNorm=((wheelAngle%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+  const targetNorm=((rawTarget%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+  let diff=(targetNorm-currentNorm+2*Math.PI)%(2*Math.PI);
+  const spins=5+Math.floor(Math.random()*4);
+  const totalRot=spins*2*Math.PI+diff;
+  const startAngle=wheelAngle;
+  const finalAngle=wheelAngle+totalRot;
+
+  isSpinning=true;playSpinSound();
+  const btn=document.getElementById('spin-btn');
+  btn.disabled=true;btn.textContent='🎰 Spinning…';
+
+  const duration=4500+Math.random()*1500,startTime=performance.now();
+  function ease(t){return 1-Math.pow(1-t,4)}
+  function animate(now){
+    const t=Math.min((now-startTime)/duration,1);
+    wheelAngle=startAngle+totalRot*ease(t);
+    drawWheel(wheelAngle);
+    if(t<1){requestAnimationFrame(animate);}
+    else{
+      wheelAngle=finalAngle;drawWheel(wheelAngle);
+      // use actual landed segment for correctness
+      const landedIdx=segUnderPointer(wheelAngle,n);
+      const landedQ=qs[landedIdx];
+      const globalIdx=QUESTIONS.indexOf(landedQ);
+      usedSet.add(globalIdx);spinCount++;
+      isSpinning=false;btn.disabled=false;btn.textContent='🎰 Spin Again';playDing();
+      showQuestion(landedQ,globalIdx);addToHistory(landedQ,globalIdx);updateStats();startCountdown(landedQ);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function showQuestion(q,idx){
+  const card=document.getElementById('question-card');
+  const textEl=document.getElementById('question-text');
+  card.classList.add('landed');textEl.classList.remove('idle');
+  textEl.style.opacity='0';
+  setTimeout(()=>{
+    textEl.textContent=q.text;
+    document.getElementById('q-category').textContent=q.cat;
+    document.getElementById('q-number').textContent='#'+(idx+1);
+    textEl.style.opacity='1';
+  },150);
+}
+
+function addToHistory(q,idx){
+  history.unshift({text:q.text,num:idx+1});
+  if(history.length>4)history.pop();
+  renderHistory();
+}
+function renderHistory(){
+  const wrap=document.getElementById('history-wrap');
+  const list=document.getElementById('history-list');
+  if(!history.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  list.innerHTML=history.map(h=>`<div class="history-item"><span class="history-num">#${h.num}</span><span class="history-text">${h.text}</span></div>`).join('');
+}
+
+function updateStats(){
+  const qs=getFiltered();
+  document.getElementById('spun-count').textContent=spinCount;
+  document.getElementById('remaining-count').textContent=qs.filter(q=>!usedSet.has(QUESTIONS.indexOf(q))).length;
+  document.getElementById('total-count').textContent=qs.length;
+}
+
+// Web Audio spin sound
+function playSpinSound(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    function tick(t,freq){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.setValueAtTime(freq,t);
+      o.frequency.exponentialRampToValueAtTime(freq*0.5,t+0.06);
+      g.gain.setValueAtTime(0.18,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.06);
+      o.start(t);o.stop(t+0.06);
+    }
+    // fast ticks that slow down over duration
+    const dur=4.5,now=ctx.currentTime;
+    let t=now,interval=0.05;
+    while(t<now+dur){
+      tick(t,200+Math.random()*300);
+      const progress=(t-now)/dur;
+      interval=0.05+progress*0.35;
+      t+=interval;
+    }
+    // final landing click
+    tick(now+dur,120);
+  }catch(e){}
+}
+
+function playDing(){
+  try{
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const now=ac.currentTime;
+    // Three rising tones for a satisfying "ding ding ding"
+    [[0,880,0.3],[0.18,1108,0.25],[0.34,1320,0.35]].forEach(([t,freq,vol])=>{
+      const o=ac.createOscillator(),g=ac.createGain();
+      const o2=ac.createOscillator(),g2=ac.createGain();
+      o.connect(g);g.connect(ac.destination);
+      o2.connect(g2);g2.connect(ac.destination);
+      o.frequency.value=freq;o.type='sine';
+      o2.frequency.value=freq*2;o2.type='sine';
+      g.gain.setValueAtTime(vol,now+t);
+      g.gain.exponentialRampToValueAtTime(0.001,now+t+0.8);
+      g2.gain.setValueAtTime(vol*0.3,now+t);
+      g2.gain.exponentialRampToValueAtTime(0.001,now+t+0.5);
+      o.start(now+t);o.stop(now+t+0.9);
+      o2.start(now+t);o2.stop(now+t+0.6);
+    });
+  }catch(e){}
+}
+
+function startCountdown(q){
+  const overlay=document.getElementById('countdown-overlay');
+  const numEl=document.getElementById('countdown-num');
+  const qWrap=document.getElementById('countdown-question-wrap');
+  resetTimer(false);
+  document.getElementById('timer-status').textContent='Get ready…';
+  // Use question passed directly - avoids DOM timing issue
+  const qText=q?q.text:document.getElementById('question-text').textContent;
+  const qCat=q?q.cat:document.getElementById('q-category').textContent;
+  qWrap.innerHTML='<div style="font-size:11px;color:var(--purple-light);letter-spacing:2px;text-transform:uppercase;font-family:Inter,sans-serif;font-weight:600;margin-bottom:12px">'+qCat+'</div><div>'+qText+'</div>';
+  qWrap.classList.remove('visible');
+  overlay.classList.add('active');
+  setTimeout(()=>qWrap.classList.add('visible'),100);
+  let count=5;
+  numEl.textContent=count;numEl.className='countdown-num pop';
+  const tick=setInterval(()=>{
+    count--;
+    if(count>0){
+      numEl.className='countdown-num';void numEl.offsetWidth;
+      numEl.className='countdown-num pop';numEl.textContent=count;
+    } else {
+      clearInterval(tick);overlay.classList.remove('active');startTimer();
+    }
+  },900);
+}
+
+function fmtTime(s){return Math.floor(s/60)+':'+(s%60).toString().padStart(2,'0')}
+function updateTimerDisplay(){
+  const d=document.getElementById('timer-display');
+  const b=document.getElementById('timer-bar');
+  d.textContent=fmtTime(timerSecs);
+  b.style.width=(timerSecs/120*100)+'%';
+  d.className='timer-display';b.className='timer-bar';
+  if(timerSecs<=30){d.classList.add('danger');b.classList.add('danger');}
+  else if(timerSecs<=60){d.classList.add('warning');b.classList.add('warning');}
+}
+function startTimer(){
+  if(timerRunning)return;
+  timerRunning=true;
+  document.getElementById('timer-status').textContent='Speak now!';
+  timerInterval=setInterval(()=>{
+    timerSecs--;updateTimerDisplay();
+    if(timerSecs<=0){
+      clearInterval(timerInterval);timerRunning=false;
+      document.getElementById('timer-display').textContent='Time!';
+      document.getElementById('timer-display').className='timer-display done';
+      document.getElementById('timer-status').textContent='Great work — spin again!';
+    }
+  },1000);
+}
+function resetTimer(updateStatus=true){
+  clearInterval(timerInterval);timerRunning=false;timerSecs=120;updateTimerDisplay();
+  if(updateStatus)document.getElementById('timer-status').textContent='Waiting for spin…';
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(isSpinning)return;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');currentFilter=btn.dataset.cat;
+    usedSet.clear();spinCount=0;history=[];renderHistory();
+    document.getElementById('question-text').textContent='Spin the wheel to get your question. A 5-second countdown then your 2-minute timer begins automatically.';
+    document.getElementById('question-text').classList.add('idle');
+    document.getElementById('q-category').textContent='Spin to begin';
+    document.getElementById('q-number').textContent='';
+    document.getElementById('question-card').classList.remove('landed');
+    document.getElementById('spin-btn').textContent='🎰 Spin the Wheel';
+    wheelAngle=0;drawWheel(0);updateStats();resetTimer();
+  });
+});
+
+drawWheel(0);updateStats();updateTimerDisplay();
+</script>
+</body>
+</html>
