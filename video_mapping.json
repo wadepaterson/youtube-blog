@@ -4,10 +4,10 @@
     "thumbnail_url": "https://i.ytimg.com/vi/8k4-aelF-CU/maxresdefault.jpg",
     "youtube_title": "Can the Size of a Room Impact Your Speech!?!"
   },
-  "24-hours-before-a-keynote": {
-    "video_id": "R6t0kkrbOPg",
-    "thumbnail_url": "https://i.ytimg.com/vi/R6t0kkrbOPg/maxresdefault.jpg",
-    "youtube_title": "24 Hours Before a Keynote"
+  "can-you-answer-a-random-question-in-2-minutes-free-tool": {
+    "video_id": "46wPVfe5KTU",
+    "thumbnail_url": "https://i.ytimg.com/vi/46wPVfe5KTU/maxresdefault.jpg",
+    "youtube_title": "Can You Answer a Random Question in 2 Minutes? (Free Tool)"
   },
   "bad-public-speaking-advice": {
     "video_id": "NGbciAkGIPM",
@@ -248,6 +248,11 @@
     "video_id": "xKtj_qYgvks",
     "thumbnail_url": "https://i.ytimg.com/vi/xKtj_qYgvks/maxresdefault.jpg",
     "youtube_title": "DON'T SPEAK Like a ROBOT"
+  },
+  "24-hours-before-a-keynote": {
+    "video_id": "R6t0kkrbOPg",
+    "thumbnail_url": "https://i.ytimg.com/vi/R6t0kkrbOPg/maxresdefault.jpg",
+    "youtube_title": "24 Hours Before a Keynote"
   },
   "how-to-prepare-for-a-toastmasters-ice-breaker-speech": {
     "video_id": "2P1hw7gTZZg",
@@ -948,5 +953,10 @@
     "video_id": "QNSm4zqeQJE",
     "thumbnail_url": "https://i.ytimg.com/vi/QNSm4zqeQJE/maxresdefault.jpg",
     "youtube_title": "HARRY MACK FREESTYLE RAP (Real Estate Rap)"
+  },
+  "why-public-speaking-will-matter-more-in-the-age-of-ai": {
+    "video_id": "45Jtl8Ff1gQ",
+    "thumbnail_url": "https://i.ytimg.com/vi/45Jtl8Ff1gQ/maxresdefault.jpg",
+    "youtube_title": "Does anyone else get AI overwhelm?"
   }
 }
