@@ -19,14 +19,21 @@ echo "========================================"
 
 # Step 1: Download new transcripts
 echo ""
-echo "[1/6] Downloading transcripts for 20 most recent videos..."
+echo "[1/6] Downloading transcripts for 10 most recent videos..."
 yt-dlp \
   --write-auto-sub \
-  --sub-lang en \
+  --sub-langs "en-orig" \
   --skip-download \
-  --playlist-end 20 \
+  --sleep-requests 2 \
+  --sleep-subtitles 5 \
+  --playlist-end 10 \
   -o "transcripts/%(title)s.%(ext)s" \
   "https://www.youtube.com/@wadepaterson/videos"
+# Rename *.en-orig.vtt to *.en.vtt
+for f in transcripts/*.en-orig.vtt; do
+  [ -e "$f" ] || continue
+  mv "$f" "${f/.en-orig.vtt/.en.vtt}"
+done
 echo "      Done."
 
 # Step 2: Refresh channel_videos.jsonl
